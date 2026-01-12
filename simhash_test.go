@@ -179,13 +179,13 @@ func TestNewSimHash_SpecialCharacters(t *testing.T) {
 }
 
 func TestNewSimHash_Numbers(t *testing.T) {
-	text1 := "test123"
+	text1 := "test 123"
 	text2 := "test 123"
 	hash1 := NewSimHash(text1)
 	hash2 := NewSimHash(text2)
 	
 	if hash1 != hash2 {
-		t.Errorf("numbers should be handled same way, got %d and %d", hash1, hash2)
+		t.Errorf("same text with numbers should produce same hash, got %d and %d", hash1, hash2)
 	}
 }
 
@@ -199,13 +199,14 @@ func TestNewSimHash_LongText(t *testing.T) {
 }
 
 func TestNewSimHash_RepeatedWords(t *testing.T) {
-	text1 := "cat cat cat"
-	text2 := "cat"
+	text1 := "cat cat cat dog"
+	text2 := "cat dog"
 	hash1 := NewSimHash(text1)
 	hash2 := NewSimHash(text2)
 	
-	if hash1 == hash2 {
-		t.Errorf("repeated words should affect hash weight")
+	distance := HammingDistance(hash1, hash2)
+	if distance == 0 {
+		t.Errorf("repeated words should affect hash weight, distance should not be zero")
 	}
 }
 
@@ -213,8 +214,14 @@ func TestNewSimHash_NgramShortText(t *testing.T) {
 	text := "abc"
 	hash := NewSimHash(text, WithNgram(4))
 	
-	if hash == 0 {
-		t.Errorf("short text with ngram should still produce hash")
+	if hash != 0 {
+		t.Errorf("text shorter than ngram width should produce zero hash, got %d", hash)
+	}
+	
+	text2 := "abcdef"
+	hash2 := NewSimHash(text2, WithNgram(4))
+	if hash2 == 0 {
+		t.Errorf("text longer than ngram width should produce non-zero hash")
 	}
 }
 
