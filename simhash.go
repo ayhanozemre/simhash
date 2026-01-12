@@ -169,3 +169,10 @@ func NewSimHash(text string, opts ...Option) uint64 {
 func HammingDistance(a, b uint64) int {
 	return bits.OnesCount64(a ^ b)
 }
+
+func AreDocumentsSimilar(text1, text2 string, k int) bool {
+	hash1 := NewSimHash(text1)
+	hash2 := NewSimHash(text2)
+
+	return HammingDistance(hash1, hash2) <= k
+}
